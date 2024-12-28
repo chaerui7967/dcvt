@@ -3,7 +3,7 @@ from xml.etree.ElementTree import Element, SubElement, dump, parse
 
 
 class VocSource:
-    def __int__(self, database="Unknown"):
+    def __init__(self, database="Unknown"):
         self.database: str = database
 
     def xml_dump(self) -> Element:
@@ -13,21 +13,21 @@ class VocSource:
 
 
 class VocSize:
-    def __int__(self, width: int, height: int, depth: int = 3):
+    def __init__(self, width: int, height: int, depth: int = 3):
         self.width: int = width
         self.height: int = height
         self.depth: int = depth
 
     def xml_dump(self) -> Element:
         voc_size = Element("size")
-        SubElement(voc_size, "width").text = self.width
-        SubElement(voc_size, "height").text = self.height
-        SubElement(voc_size, "depth").text = self.depth
+        SubElement(voc_size, "width").text = str(self.width)
+        SubElement(voc_size, "height").text = str(self.height)
+        SubElement(voc_size, "depth").text = str(self.depth)
         return voc_size
 
 
 class VocObject:
-    def __int__(
+    def __init__(
         self,
         name: str,
         pose: str = "Unspecified",
@@ -47,8 +47,8 @@ class VocObject:
         voc_object = Element("object")
         SubElement(voc_object, "name").text = self.name
         SubElement(voc_object, "pose").text = self.pose
-        SubElement(voc_object, "truncated").text = self.truncated
-        SubElement(voc_object, "difficult").text = self.difficult
+        SubElement(voc_object, "truncated").text = str(self.truncated)
+        SubElement(voc_object, "difficult").text = str(self.difficult)
         voc_object.append(self.bndbox.xml_dump())
         return voc_object
 
@@ -62,10 +62,10 @@ class VocBndbox:
 
     def xml_dump(self) -> Element:
         voc_bndbox = Element("bndbox")
-        SubElement(voc_bndbox, "xmin").text = self.xmin
-        SubElement(voc_bndbox, "ymin").text = self.ymin
-        SubElement(voc_bndbox, "xmax").text = self.xmax
-        SubElement(voc_bndbox, "ymax").text = self.ymax
+        SubElement(voc_bndbox, "xmin").text = str(self.xmin)
+        SubElement(voc_bndbox, "ymin").text = str(self.ymin)
+        SubElement(voc_bndbox, "xmax").text = str(self.xmax)
+        SubElement(voc_bndbox, "ymax").text = str(self.ymax)
         return voc_bndbox
 
 
@@ -81,14 +81,15 @@ class VocDataSet:
         self.filename: str = filename
         self.path: str = path
         self.source: VocSource = VocSource()
+        self.size = None
         self.size: VocSize
         self.segmented: int = seg
         self.object: List[VocObject] = []
 
     def set_source(self, database) -> None:
-        self.source = VocSource(database)
+        self.source = VocSource()
 
-    def set_size(self, width: int, height: int, depth: int = 3):
+    def set_size(self, width: int, height: int, depth: int = 3) -> None:
         self.size = VocSize(width, height, depth)
 
     def add_object(
@@ -115,7 +116,7 @@ class VocDataSet:
         voc_dataset.append(source)
         size = self.size.xml_dump()
         voc_dataset.append(size)
-        SubElement(voc_dataset, "segmented").text = self.segmented
+        SubElement(voc_dataset, "segmented").text = str(self.segmented)
         for obj in self.object:
             voc_dataset.append(obj.xml_dump())
 
