@@ -1,4 +1,7 @@
 from typing import List
+import json
+
+from dcvt.util import DcvtFileManager as fs
 
 
 class LabelmeShape:
@@ -28,7 +31,42 @@ class LabelmeShape:
 
 
 class LabelmeDataSet:
-    def __init__(
+    def __init__(self):
+        self.version: str = "0.0.0"
+        self.flags: dict = {}
+        self.shapes: List[LabelmeShape] = []
+        self.imagePath: str = None
+        self.imageHeight: int = 0
+        self.imageWidth: int = 0
+        self.imageData: str = None
+
+    def load_by_json(self, json_path: str):
+        data = fs.open_file_as_str(json_path)
+        data = json.loads(data)
+
+        if "shapes" not in data.keys():
+            print(f"Not Shapes Key...{data}")
+            return
+
+        self.set_labelme_by_data(
+            data["version"],
+            data["imagePath"],
+            data["imageHeight"],
+            data["imageWidth"],
+            data["flags"],
+            data["imageData"],
+        )
+
+        for data_s in data["shapes"]:
+            self.set_labelmeshape(
+                data_s["label"],
+                data_s["points"],
+                data_s["group_id"],
+                data_s["shape_type"],
+                data_s["flags"],
+            )
+
+    def set_labelme_by_data(
         self,
         version: str,
         img_path: str,
@@ -36,10 +74,9 @@ class LabelmeDataSet:
         img_w: int,
         flags: dict = {},
         img_data: str = None,
-    ):
+    ) -> None:
         self.version: str = version
         self.flags: dict = flags
-        self.shapes: List[LabelmeShape] = []
         self.imagePath: str = img_path
         self.imageHeight: int = img_h
         self.imageWidth: int = img_w

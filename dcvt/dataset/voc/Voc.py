@@ -13,7 +13,12 @@ class VocSource:
 
 
 class VocSize:
-    def __init__(self, width: int, height: int, depth: int = 3):
+    def __init__(self):
+        self.width: int = 0
+        self.height: int = 0
+        self.depth: int = 3
+
+    def set_voc_size(self, width: int, height: int, depth: int = 3):
         self.width: int = width
         self.height: int = height
         self.depth: int = depth
@@ -70,19 +75,22 @@ class VocBndbox:
 
 
 class VocDataSet:
-    def __init__(
-        self,
-        folder: str,
-        filename: str,
-        path: str,
-        seg: int = 0,
-    ):
+    def __init__(self):
+        self.folder: str = None
+        self.filename: str = None
+        self.path: str = None
+        self.source: VocSource = VocSource()
+        self.size = None
+        self.size: VocSize = VocSize()
+        self.segmented: int = None
+        self.object: List[VocObject] = []
+
+    def set_voc_data(self, folder: str, filename: str, path: str, seg: int = 0):
         self.folder: str = folder
         self.filename: str = filename
         self.path: str = path
         self.source: VocSource = VocSource()
         self.size = None
-        self.size: VocSize
         self.segmented: int = seg
         self.object: List[VocObject] = []
 
@@ -90,7 +98,7 @@ class VocDataSet:
         self.source = VocSource()
 
     def set_size(self, width: int, height: int, depth: int = 3) -> None:
-        self.size = VocSize(width, height, depth)
+        self.size = self.size.set_voc_size(width, height, depth)
 
     def add_object(
         self,
