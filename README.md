@@ -2,6 +2,6 @@
 
 ## Cvt dataset list
 - Ade20k
-- Coco
+- CocoDataSet
 - Labelme
 - Voc

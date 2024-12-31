@@ -1,42 +1,45 @@
 import json
 import chardet
-from xml.etree.ElementTree import Element, dump, parse
-from xml.dom import minidom
+import os
 import xml.etree.ElementTree as ET
-
-import chardet
-
-from dcvt.dataset.voc import VocDataSet
 
 
 class DcvtFileManager:
-    def cal_area(self, points) -> int:
-        pass
 
-    def find_character_set(self, raw: bytes) -> str:
+    @staticmethod
+    def _find_character_set(raw: bytes) -> str:
         return chardet.detect(raw)["encoding"]
+
+    @staticmethod
+    def load_from_xml(path: str):
+        return ET.parse(path).getroot()
+
+    @staticmethod
+    def load_from_json(path: str):
+        return json.loads(path)
+
+    @staticmethod
+    def save_json(data: dict, out_path: str) -> None:
+        with open(out_path, "w") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    @staticmethod
+    def get_parents_dir(path: str) -> str:
+        parent_dir_path = os.path.dirname(path)
+        parent_dir = parent_dir_path.split("/")[-1]
+        return parent_dir
+
+    @staticmethod
+    def get_filename(path: str) -> str:
+        return os.path.basename(path)
 
     def open_file_as_str(self, path: str, force_convert: bool = True):
         with open(path, "rb") as f:
             buf = f.read()
-            encodings_name = self.find_character_set(buf)
+            encodings_name = self._find_character_set(buf)
             if encodings_name not in ["cp-949", "utf-8", "euc-kr"]:
                 print(f"WARNING.. {encodings_name} might result in an Error... ")
                 if force_convert:
                     print(f'Convert encodings.. {encodings_name} -> "utf-8"')
                     encodings_name = "utf-8"
             return buf.decode(encodings_name)
-
-    def load_from_json(self, path: str):
-        return json.loads(path)
-
-    def save_json(self, data: dict, out_path: str) -> None:
-        with open(out_path, "w") as f:
-            json.dumps(data, f, ensure_ascii=False)
-
-    def save_xml_by_voc(self, data: VocDataSet, out_path: str) -> None:
-        voc_data = data.voc_dump()
-        voc_xml = minidom.parseString(ET.tostring(voc_data)).toprettyxml(indent="  ")
-
-        with open(out_path, "w") as f:
-            f.write(voc_xml)

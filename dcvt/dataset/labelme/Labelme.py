@@ -1,7 +1,10 @@
 from typing import List
 import json
 
-from dcvt.util import DcvtFileManager as fs
+from dcvt.util import DcvtFileManager, DcvtCalculation
+
+fs = DcvtFileManager()
+calc = DcvtCalculation()
 
 
 class LabelmeShape:
@@ -22,7 +25,7 @@ class LabelmeShape:
     def make_labelmeshape_dict(self) -> dict:
         data = {
             "label": self.label,
-            "points": self.points,
+            "points": [[int(x), int(y)] for x, y in self.points],
             "group_id": self.group_id,
             "shape_type": self.shape_type,
             "flags": self.flags,
@@ -40,7 +43,35 @@ class LabelmeDataSet:
         self.imageWidth: int = 0
         self.imageData: str = None
 
-    def load_by_json(self, json_path: str):
+    def convert_dataset_by_convert_type(
+        self, convert_object: object, convert_label_type: str
+    ):
+        file_name = fs.get_filename(self.imagePath)
+        folder = fs.get_parents_dir(self.imagePath)
+        width = self.imageWidth
+        height = self.imageHeight
+
+        if convert_label_type == "voc":
+            convert_object.set_voc_data(folder, file_name, self.imagePath)
+            convert_object.set_size(width, height)
+            for shape in self.shapes:
+                name = shape.label
+                xmin = calc.get_xmin(shape.points)
+                ymin = calc.get_ymin(shape.points)
+                xmax = calc.get_xmax(shape.points)
+                ymax = calc.get_ymax(shape.points)
+                convert_object.add_object(name, xmin, ymin, xmax, ymax)
+
+        elif convert_label_type == "ade20k":
+            pass
+        elif convert_label_type == "coco":
+            pass
+        else:
+            return self
+
+        return convert_object
+
+    def load_label_from_file(self, json_path: str):
         data = fs.open_file_as_str(json_path)
         data = json.loads(data)
 
@@ -110,3 +141,7 @@ class LabelmeDataSet:
 
         print("Complete labelme dict..")
         return data
+
+    def save(self, output_path: str) -> None:
+        data = self.make_label_dict()
+        fs.save_json(data, output_path)
