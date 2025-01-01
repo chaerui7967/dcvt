@@ -24,6 +24,7 @@ class ConvertWork(QThread):
         config = ConfigManager()
         config.load_config()
 
+        self.converter_version = config.converter_version
         self.labelme_version = config.labelme_version
 
     def set_signal(self, signal):
@@ -50,7 +51,8 @@ class ConvertWork(QThread):
     def run(self):
         try:
             print("Start Converting..")
-            print(f"labelme Versions:{self.labelme_version}")
+            print(f"Converter Versions : {self.converter_version}")
+            print(f"labelme Versions : {self.labelme_version}")
 
             offset = 0.0
             offset += 10
@@ -127,7 +129,6 @@ class ConvertWork(QThread):
         else:
             convert_object = LabelmeDataSet()
             convert_ext = "json"
-            return
 
         label_object.load_label_from_file(label_path)
 

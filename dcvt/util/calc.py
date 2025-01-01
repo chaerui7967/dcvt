@@ -1,11 +1,13 @@
 from typing import List
 import numpy as np
+from shapely.geometry import Polygon
 
 
 class DcvtCalculation:
     @staticmethod
     def cal_area(points: List[list]) -> int:
-        pass
+        polygon = Polygon(points)
+        return polygon.area
 
     @staticmethod
     def get_xmin(points: List[list]) -> int:

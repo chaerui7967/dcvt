@@ -7,12 +7,14 @@ class ConfigManager:
         self.config_path = None
         self.weights_path = None
         self.devices = None
+        self.converter_version = None
         self.labelme_version = None
 
     def load_config(self):
         config = configparser.ConfigParser()
         config.read('./dcvt/config.ini', encoding='utf-8')
 
+        self.converter_version = config['converter']['version']
         self.labelme_version = config['labelme']['version']
 
     def save_config(self, section, option, value):

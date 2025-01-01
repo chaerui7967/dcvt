@@ -128,16 +128,12 @@ class LabelmeDataSet:
         data = {
             "version": self.version,
             "flags": self.flags,
-            "shapes": [],
+            "shapes": [i.make_labelmeshape_dict() for i in self.shapes],
             "imagePath": self.imagePath,
             "imageData": self.imageData,
             "imageHeight": self.imageHeight,
             "imageWidth": self.imageWidth,
         }
-
-        for shape in self.shapes:
-            assert isinstance(shape, LabelmeShape)
-            data["shapes"].append(shape.make_labelmeshape_dict())
 
         print("Complete labelme dict..")
         return data
