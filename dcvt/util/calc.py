@@ -12,9 +12,11 @@ class DcvtCalculation:
     @staticmethod
     def points_flatten(points: List[list]) -> list:
         flatten_points = []
-        for x, y in points:
-            flatten_points.append(x)
-            flatten_points.append(y)
+        for point in points:
+            if isinstance(point, list):
+                flatten_points.extend(point)
+            else:
+                flatten_points.append(point)
         return flatten_points
 
     @staticmethod
