@@ -7,6 +7,7 @@ from dcvt.util import DcvtFileManager, DcvtCalculation
 fs = DcvtFileManager()
 calc = DcvtCalculation()
 
+
 class CocoInfo:
     def __init__(self):
         current_date = datetime.now()
@@ -128,7 +129,7 @@ class CocoAnnotations:
             "id": self.id,
             "image_id": self.image_id,
             "category_id": self.category_id,
-            "segmentation": self.segmentation,
+            "segmentation": calc.points_flatten(self.segmentation),
             "area": self.area,
             "bbox": self.bbox,
             "iscrowd": self.iscrowd,
@@ -195,11 +196,13 @@ class CocoDataSet:
         image_id: int,
         cat_id: int,
         seg: List[list],
-        area: int,
         bbox: list,
         iscrowd: int = 0,
     ) -> None:
         coco_anno = CocoAnnotations()
+
+        area = calc.cal_area(seg)
+
         coco_anno.set_cocoAnnotations(
             anno_id, image_id, cat_id, seg, area, bbox, iscrowd
         )
