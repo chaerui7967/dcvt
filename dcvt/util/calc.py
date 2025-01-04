@@ -20,6 +20,14 @@ class DcvtCalculation:
         return flatten_points
 
     @staticmethod
+    def get_bbox(points: List[list]) -> list:
+        xmin = DcvtCalculation.get_xmin(points)
+        ymin = DcvtCalculation.get_ymin(points)
+        xmax = DcvtCalculation.get_xmax(points)
+        ymax = DcvtCalculation.get_ymax(points)
+        return [xmin, ymin, xmax, ymax]
+
+    @staticmethod
     def get_xmin(points: List[list]) -> int:
         return min([int(x) for x, y in points])
 

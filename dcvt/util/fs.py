@@ -1,3 +1,5 @@
+from typing import List
+
 import json
 import chardet
 import os
@@ -5,6 +7,20 @@ import xml.etree.ElementTree as ET
 
 
 class DcvtFileManager:
+
+    @staticmethod
+    def find_label_id_by_name(label_name:str, labelmap:List[dict]) -> int:
+        for label in labelmap:
+            if label['name'] == label_name:
+                return label['id']
+        return 0
+
+    @staticmethod
+    def find_label_name_by_id(label_id:int, labelmap:List[dict]) -> str:
+        for label in labelmap:
+            if label['id'] == label_id:
+                return label['name']
+        return ''
 
     @staticmethod
     def _find_character_set(raw: bytes) -> str:

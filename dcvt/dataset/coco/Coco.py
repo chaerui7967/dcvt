@@ -1,8 +1,9 @@
 from typing import List
+import os
 from datetime import datetime
 
 from dcvt.util import DcvtFileManager, DcvtCalculation
-
+from dcvt.labelmap import Default_map
 
 fs = DcvtFileManager()
 calc = DcvtCalculation()
@@ -100,10 +101,12 @@ class CocoAnnotations:
         self.id: int = 0
         self.image_id: int = 0
         self.category_id: int = 0
+        self.name: str = ""
         self.segmentation: List[list] = []
         self.area: int = 0
         self.bbox: list = []
         self.iscrowd: int = 0
+        self.labelmap: List[dict] = []
 
     def set_cocoAnnotations(
         self,
@@ -114,15 +117,26 @@ class CocoAnnotations:
         area: int,
         bbox: list,
         iscrowd: int = 0,
+        labelmap: List[dict] = Default_map,
+        label_name: str = "",
     ):
         self.id = anno_id
         self.image_id = image_id
         self.category_id = category_id
+        self.labelmap = labelmap
+        if label_name != "":
+            self.name = label_name
+        else:
+            self.name = self._search_label_name_by_id(self.category_id, labelmap)
         self.segmentation = segmentation
         self.area = area
         self.bbox = bbox
         self.iscrowd = iscrowd
         return self
+
+    @staticmethod
+    def _search_label_name_by_id(cat_id, labelmap):
+        return fs.find_label_name_by_id(cat_id, labelmap)
 
     def make_cocoanno_dict(self) -> dict:
         return {
@@ -162,7 +176,7 @@ class CocoDataSet:
         self.categories: List[CocoCategories] = []
 
     def convert_dataset_by_convert_type(
-        self, convert_object: object, convert_label_type: str
+        self, convert_object: object, convert_label_type: str, idx: int = 0
     ):
         if convert_label_type == "labelme":
             pass
@@ -173,6 +187,23 @@ class CocoDataSet:
 
     def load_label_from_file(self, label_path: str) -> None:
         pass
+
+    def _set_labelmap(self, labelmap: List[dict]):
+        category_list = []
+        for label in labelmap:
+            cat = CocoCategories()
+            cat.set_cocoCategories(label["id"], label["name"])
+            category_list.append(cat)
+
+        self.categories = category_list
+
+    def set_cocoDataset(
+        self,
+        type: str = "instances",
+        labelmap: List[dict] = Default_map,
+    ):
+        self._set_labelmap(labelmap)
+        self.type = type
 
     def add_cocoImages(
         self,
@@ -192,7 +223,6 @@ class CocoDataSet:
 
     def add_cocoAnno(
         self,
-        anno_id: int,
         image_id: int,
         cat_id: int,
         seg: List[list],
@@ -202,7 +232,7 @@ class CocoDataSet:
         coco_anno = CocoAnnotations()
 
         area = calc.cal_area(seg)
-
+        anno_id = len(self.annotations)
         coco_anno.set_cocoAnnotations(
             anno_id, image_id, cat_id, seg, area, bbox, iscrowd
         )
@@ -228,4 +258,5 @@ class CocoDataSet:
 
     def save(self, output_path: str) -> None:
         data = self.make_coco_dict()
+        output_path = os.path.join(output_path, 'annotations.json')
         fs.save_json(data, output_path)

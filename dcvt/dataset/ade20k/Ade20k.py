@@ -4,13 +4,14 @@ import cv2
 import numpy as np
 
 from dcvt.util import DcvtFileManager, DcvtCalculation
+from dcvt.labelmap import Default_map
 
 fs = DcvtFileManager()
 calc = DcvtCalculation()
 
 class Ade20kObject:
     def __init__(self):
-        self.label_name: str = ""
+        self.name: str = ""
         self.label_id: int = 0
         self.points: list = []
         self.area: int = 0
@@ -23,7 +24,7 @@ class Ade20kObject:
         color: tuple = None,
         label_name: str = None,
     ):
-        self.label_name = label_name
+        self.name = label_name
         self.label_id = label_id
         self.points = points
         self.area = self._get_area()

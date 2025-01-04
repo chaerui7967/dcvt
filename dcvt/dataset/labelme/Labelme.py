@@ -1,7 +1,9 @@
+import os.path
 from typing import List
 import json
 
 from dcvt.util import DcvtFileManager, DcvtCalculation
+from dcvt.labelmap import Default_map
 
 fs = DcvtFileManager()
 calc = DcvtCalculation()
@@ -44,7 +46,11 @@ class LabelmeDataSet:
         self.imageData: str = None
 
     def convert_dataset_by_convert_type(
-        self, convert_object: object, convert_label_type: str
+        self,
+        convert_object: object,
+        convert_label_type: str,
+        idx: int = 0,
+        labelmap=Default_map,
     ):
         file_name = fs.get_filename(self.imagePath)
         folder = fs.get_parents_dir(self.imagePath)
@@ -61,11 +67,17 @@ class LabelmeDataSet:
                 xmax = calc.get_xmax(shape.points)
                 ymax = calc.get_ymax(shape.points)
                 convert_object.add_object(name, xmin, ymin, xmax, ymax)
-
         elif convert_label_type == "ade20k":
             pass
         elif convert_label_type == "coco":
-            pass
+            convert_object.set_cocoDataset(labelmap=labelmap)
+            convert_file_path = os.path.basename(self.imagePath)
+            convert_object.add_cocoImages(f'JPEGImages/{convert_file_path}', self.imageHeight, self.imageWidth, idx)
+            for shape in self.shapes:
+                label_name = shape.label
+                label_id = fs.find_label_id_by_name(label_name, labelmap)
+                bbox = calc.get_bbox(shape.points)
+                convert_object.add_cocoAnno(idx, label_id, shape.points, bbox)
         else:
             return self
 

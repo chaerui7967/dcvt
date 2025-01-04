@@ -3,9 +3,11 @@ from xml.etree.ElementTree import Element, SubElement
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
-from dcvt.util import DcvtFileManager
+from dcvt.util import DcvtFileManager, DcvtCalculation
+from dcvt.labelmap import Default_map
 
 fs = DcvtFileManager()
+calc = DcvtCalculation()
 
 
 class VocSource:
