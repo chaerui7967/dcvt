@@ -122,7 +122,7 @@ class Ade20kDataSet:
             points = points.reshape((-1, 1, 2))
             cv2.fillPoly(label_data, [points], obj.label_id)
             if save_vis:
-                cv2.fillPoly(label_data, [points], obj.color)
+                cv2.fillPoly(vis_data, [points], obj.color)
         cv2.imwrite(output_path, label_data)
         if save_vis:
             vis_output_path = fs.make_vis_file_name(output_path)
