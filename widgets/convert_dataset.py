@@ -27,6 +27,7 @@ class DataSetConvert(QWidget):
         super().__init__(parent)
         self.convert_progress = None
         self.adjust_point = None
+        self.vis_save = None
         self.in_dataset_list = QListWidget(self)
         self.input_label_item = None
         self.out_dataset_list = QListWidget(self)
@@ -50,6 +51,8 @@ class DataSetConvert(QWidget):
         group_box = QGroupBox(self.tr("DataSet List"), self)
         self.adjust_point = QCheckBox(self.tr("point 조정"), self)
         self.adjust_point.setChecked(True)
+        self.vis_save = QCheckBox(self.tr("vis 파일 저장"), self)
+        self.vis_save.setChecked(True)
         self.input_label = QLabel(self.tr("Input 라벨"), self)
         self.output_label = QLabel(self.tr("Convert 라벨"), self)
 
@@ -67,6 +70,7 @@ class DataSetConvert(QWidget):
         v_layout_sub.addLayout(in_h_layout)
         v_layout_sub.addLayout(out_h_layout)
         v_layout_sub.addWidget(self.adjust_point)
+        v_layout_sub.addWidget(self.vis_save)
         v_layout_sub.addWidget(self.convert_button)
         group_box.setLayout(v_layout_sub)
 
@@ -158,6 +162,7 @@ class DataSetConvert(QWidget):
         self.work_thread.set_input_label(self.input_label_item)
         self.work_thread.set_output_label(self.output_label_item)
         self.work_thread.set_adjust_point(self.adjust_point)
+        self.work_thread.set_save_vis(self.vis_save)
         self.work_thread.set_file_path(file_path)
         self.work_thread.start()
 

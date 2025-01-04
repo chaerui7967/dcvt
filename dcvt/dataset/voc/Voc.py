@@ -209,7 +209,7 @@ class VocDataSet:
 
         self.add_object(name, xmin, ymin, xmax, ymax, pose, trunc, diffic)
 
-    def save(self, output_path: str) -> None:
+    def save(self, output_path: str, save_vis) -> None:
         voc_dataset = Element("annotation")
         SubElement(voc_dataset, "folder").text = self.folder
         SubElement(voc_dataset, "filename").text = self.filename

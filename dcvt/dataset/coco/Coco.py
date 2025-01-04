@@ -169,7 +169,7 @@ class CocoCategories:
 class CocoDataSet:
     def __init__(self):
         self.info: CocoInfo = CocoInfo()
-        self.licenses: List[CocoLicenses] = []
+        self.licenses: List[CocoLicenses] = [CocoLicenses()]
         self.images: List[CocoImages] = []
         self.type: str = "instances"
         self.annotations: List[CocoAnnotations] = []
@@ -256,7 +256,7 @@ class CocoDataSet:
         print("Complete labelme dict..")
         return data
 
-    def save(self, output_path: str) -> None:
+    def save(self, output_path: str, save_vis) -> None:
         data = self.make_coco_dict()
         output_path = os.path.join(output_path, 'annotations.json')
         fs.save_json(data, output_path)

@@ -9,6 +9,7 @@ from dcvt.labelmap import Default_map
 fs = DcvtFileManager()
 calc = DcvtCalculation()
 
+
 class Ade20kObject:
     def __init__(self):
         self.name: str = ""
@@ -27,10 +28,10 @@ class Ade20kObject:
         self.name = label_name
         self.label_id = label_id
         self.points = points
-        self.area = self._get_area()
+        self._get_area()
         self.color = color
 
-    def _get_area(self) -> None:
+    def _get_area(self):
         self.area = calc.cal_area(self.points)
 
     def cvt_point_as_int(self):
@@ -40,6 +41,8 @@ class Ade20kObject:
 class Ade20kDataSet:
     def __init__(self):
         self.image_path: str = None
+        self.height: int = 0
+        self.width: int = 0
         self.annotation_path: str = None
         self.objects: List[Ade20kObject] = []
         self.background_id: int = 0
@@ -75,14 +78,52 @@ class Ade20kDataSet:
                 if hierarchy[0][idx][3] >= 0:
                     pass
 
-
-
     def set_background_id(self, background_id: int) -> None:
         self.background_id = background_id
 
+    def set_ade20k_data(
+        self, image_path: str, height: int, width: int, annotation_path: str
+    ):
+        self.image_path = image_path
+        self.height = height
+        self.width = width
+        self.annotation_path = annotation_path
+
+    def add_object(self, label_id, points, labelmap=Default_map):
+        ade20k_object = Ade20kObject()
+        label_name = fs.find_label_name_by_id(label_id, labelmap)
+        color = fs.find_label_color_by_id(label_id, labelmap)
+        ade20k_object.set_object(label_id, points, color, label_name)
+        self.objects.append(ade20k_object)
+
     def _sort_label_by_area(self):
-        pass
+        self.objects = sorted(self.objects, key=lambda x: x.area, reverse=True)
 
     def show_label_eval(self):
         pass
 
+    def _make_label_dict(self) -> dict:
+        self._sort_label_by_area()
+        label_dict = dict()
+        for object in self.objects:
+            if str(object.label_id) not in label_dict.keys():
+                label_dict[str(object.label_id)] = [object.points]
+            else:
+                label_dict[str(object.label_id)].append(object.points)
+        return label_dict
+
+    def save(self, output_path: str, save_vis:bool) -> None:
+        self._sort_label_by_area()
+        label_data = np.zeros((self.height, self.width), np.uint8)
+        vis_data = np.zeros((self.height, self.width), np.uint8)
+
+        for obj in self.objects:
+            points = np.array(obj.points, dtype=np.int32)
+            points = points.reshape((-1, 1, 2))
+            cv2.fillPoly(label_data, [points], obj.label_id)
+            if save_vis:
+                cv2.fillPoly(label_data, [points], obj.color)
+        cv2.imwrite(output_path, label_data)
+        if save_vis:
+            vis_output_path = fs.make_vis_file_name(output_path)
+            cv2.imwrite(vis_output_path, vis_data)

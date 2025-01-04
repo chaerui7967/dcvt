@@ -9,22 +9,37 @@ import xml.etree.ElementTree as ET
 class DcvtFileManager:
 
     @staticmethod
-    def find_label_id_by_name(label_name:str, labelmap:List[dict]) -> int:
+    def find_label_id_by_name(label_name: str, labelmap: List[dict]) -> int:
         for label in labelmap:
-            if label['name'] == label_name:
-                return label['id']
+            if label["name"] == label_name:
+                return label["id"]
         return 0
 
     @staticmethod
-    def find_label_name_by_id(label_id:int, labelmap:List[dict]) -> str:
+    def find_label_name_by_id(label_id: int, labelmap: List[dict]) -> str:
         for label in labelmap:
-            if label['id'] == label_id:
-                return label['name']
-        return ''
+            if label["id"] == label_id:
+                return label["name"]
+        return ""
+
+    @staticmethod
+    def find_label_color_by_id(label_id: int, labelmap: List[dict]) -> tuple:
+        for label in labelmap:
+            if label["id"] == label_id:
+                return label["color"]
+        return (255, 255, 255)
 
     @staticmethod
     def _find_character_set(raw: bytes) -> str:
         return chardet.detect(raw)["encoding"]
+
+    @staticmethod
+    def convert_extension(file_path:str, convert_ext: str):
+        return ".".join(file_path.split(".")[:-1]) + f".{convert_ext}"
+
+    @staticmethod
+    def make_vis_file_name(file_path:str):
+        return ".".join(file_path.split(".")[:-1]) + '_vis.' + file_path.split(".")[-1]
 
     @staticmethod
     def load_from_xml(path: str):

@@ -68,7 +68,12 @@ class LabelmeDataSet:
                 ymax = calc.get_ymax(shape.points)
                 convert_object.add_object(name, xmin, ymin, xmax, ymax)
         elif convert_label_type == "ade20k":
-            pass
+            anno_path = fs.convert_extension(self.imagePath, 'json')
+            convert_object.set_ade20k_data(self.imagePath, self.imageHeight, self.imageWidth, anno_path)
+            for shape in self.shapes:
+                name = shape.label
+                label_id = fs.find_label_id_by_name(name, labelmap)
+                convert_object.add_object(label_id, shape.points, labelmap=labelmap)
         elif convert_label_type == "coco":
             convert_object.set_cocoDataset(labelmap=labelmap)
             convert_file_path = os.path.basename(self.imagePath)
@@ -150,6 +155,6 @@ class LabelmeDataSet:
         print("Complete labelme dict..")
         return data
 
-    def save(self, output_path: str) -> None:
+    def save(self, output_path: str, save_vis: bool) -> None:
         data = self.make_label_dict()
         fs.save_json(data, output_path)

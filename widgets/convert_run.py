@@ -2,6 +2,7 @@ import os
 import traceback
 
 from PySide6.QtCore import QThread, Signal
+from numpy.ma.core import set_fill_value
 
 from dcvt.dataset import *
 from config_manager import ConfigManager
@@ -15,6 +16,7 @@ class ConvertWork(QThread):
     adjust_point = False
     input_label = None
     output_label = None
+    save_vis = False
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -48,6 +50,9 @@ class ConvertWork(QThread):
     def set_adjust_point(self, adjust):
         self.adjust_point = adjust
 
+    def set_save_vis(self, save_vis):
+        self.save_vis = save_vis
+
     def run(self):
         try:
             print("Start Converting..")
@@ -62,13 +67,15 @@ class ConvertWork(QThread):
                 search_ext = ".xml"
             elif self.input_label == "ade20k":
                 search_ext = ".png"
+            elif self.input_label == "coco":
+                search_ext = "annotations"
             else:
                 search_ext = ".json"
 
             label_paths = []
             for root, dirs, files in os.walk(self.file_path):
                 for f in files:
-                    if not f.endswith(search_ext):
+                    if search_ext not in f:
                         continue
                     file_path = os.path.join(root, f)
                     label_paths.append(file_path)
@@ -96,7 +103,7 @@ class ConvertWork(QThread):
                     self.signal_update_progress.emit(round(offset))
 
                 if convert_object:
-                    self._save_label(convert_object, outpath, label_paths)
+                    self._save_label(convert_object, outpath)
 
         except Exception as e:
             self.signal_start_or_stop_convert.emit(False, traceback.format_exc())
@@ -129,7 +136,6 @@ class ConvertWork(QThread):
         elif convert_label_type == "ade20k":
             convert_object = Ade20kDataSet()
             convert_ext = "png"
-            return
         elif convert_label_type == "coco":
             if convert_object is None:
                 convert_object = CocoDataSet()
@@ -150,11 +156,10 @@ class ConvertWork(QThread):
         else:
             return convert_object, convert_ext, None
 
-    @staticmethod
-    def _save_label(result_data, label_path, convert_ext='json', file_paths=[]):
+    def _save_label(self, result_data, label_path, convert_ext='json'):
         if os.path.isdir(label_path):
             label_path = label_path
         else:
-            label_path = ".".join(label_path.split(".")[:-1]) + f".{convert_ext}"
+            label_path = fs.convert_extension(label_path, convert_ext)
 
-        result_data.save(label_path)
+        result_data.save(label_path, self.save_vis)
