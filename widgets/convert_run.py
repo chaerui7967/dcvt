@@ -5,7 +5,7 @@ from PySide6.QtCore import QThread, Signal
 from numpy.ma.core import set_fill_value
 
 from dcvt.dataset import *
-from config_manager import ConfigManager
+from dcvt.util.config_manager import ConfigManager
 
 TEST_SAVE_PATH_DIR = "/Users/chaerui/project/side_project/test_tmp"
 
